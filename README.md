@@ -1,5 +1,8 @@
 # BlueBeacon
 
+[![Pipeline Status](https://gitlab.project-creative.net/AuraDev/BlueBeacon/badges/master/pipeline.svg)](https://gitlab.project-creative.net/AuraDev/BlueBeacon/-/pipelines)
+[![Coverage](https://gitlab.project-creative.net/AuraDev/BlueBeacon/badges/master/coverage.svg)](https://gitlab.project-creative.net/AuraDev/BlueBeacon/-/graphs/master/charts)
+
 <p align="center">
   <img src="logo_200.png" alt="BlueBeacon Logo" width="200"/>
 </p>
