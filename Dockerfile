@@ -9,7 +9,7 @@ WORKDIR /app
 COPY . .
 
 # Install dependencies and PyInstaller
-RUN pip install --no-cache-dir -e . && \
+RUN pip install --no-cache-dir . && \
     pip install --no-cache-dir pyinstaller
 
 # Create optimized single binary
