@@ -7,12 +7,15 @@
   <img src="logo_200.png" alt="BlueBeacon Logo" width="200"/>
 </p>
 
-BlueBeacon is a Python utility designed to serve as a Docker healthcheck for Minecraft servers. It automatically detects server settings and pings the server to verify responsiveness, making it easy to monitor containerized Minecraft servers without additional configuration.
+BlueBeacon is a Python utility designed to serve as a Docker healthcheck for Minecraft servers. It automatically detects
+server settings and pings the server to verify responsiveness, making it easy to monitor containerized Minecraft servers
+without additional configuration.
 
 ## Features
 
 - **Automatic Server Detection**: Automatically finds and reads Minecraft server configuration files
-- **Multi-Platform Support**: Works with Java Edition servers (vanilla, Spigot, Paper, Forge, Fabric, etc.), Bedrock Edition servers, and proxies (BungeeCord, Velocity)
+- **Multi-Platform Support**: Works with Java Edition servers (vanilla, Spigot, Paper, Forge, Fabric, etc.), Bedrock
+  Edition servers, and proxies (BungeeCord, Velocity)
 - **Zero Configuration**: No need to manually specify server ports or settings
 - **Standalone Binary**: Distributed as source code but compiled to a standalone binary in the Docker build process
 
@@ -37,10 +40,12 @@ bluebeacon [CONFIG_PATH]
 ```
 
 Where `CONFIG_PATH` can be either:
+
 - A specific config file path
 - A directory to search for config files
 
-If no path is provided, BlueBeacon will search the current user's home directory, which is where most Docker images place server files.
+If no path is provided, BlueBeacon will search the current user's home directory, which is where most Docker images
+place server files.
 
 ## How It Works
 
@@ -51,30 +56,44 @@ If no path is provided, BlueBeacon will search the current user's home directory
 
 ## Distribution
 
-BlueBeacon is distributed as source code, with a template Dockerfile that includes a build stage to compile it into a standalone binary. This ensures no additional dependencies are needed in the final Docker image.
+BlueBeacon is distributed as source code, with a template Dockerfile that includes a build stage to compile it into a
+standalone binary. This ensures no additional dependencies are needed in the final Docker image.
+
+### Note on libc bundling
+
+The build process uses PyInstaller to create a single-file executable and then repackages it with `staticx` to bundle
+required shared libraries, including the C standard library (libc), into the final executable. This makes the binary
+self-contained and not dependent on the base image's libc at runtime.
 
 ## Prebuilt Docker images for Pterodactyl
 
-Prebuilt container images are provided for use with Pterodactyl. These images are designed to be used as base images ("yolks") for your Eggs and are built on top of the official Pterodactyl yolk images:
+Prebuilt container images are provided for use with Pterodactyl. These images are designed to be used as base images ("
+yolks") for your Eggs and are built on top of the official Pterodactyl yolk images:
 
 - Official yolks: https://github.com/pterodactyl/yolks/pkgs/container/yolks
 
 Registry:
+
 - registry.gitlab.project-creative.net/auradev/bluebeacon:TAG
 
 Key details:
-- Tags align with the upstream yolk tags (e.g., `java_8`, `java_11`, `java_17`, `java_21`, as well as `java_17j9`, etc.).
-- Each BlueBeacon image layer adds the BlueBeacon binary, and the Dockerfile includes a HEALTHCHECK that runs BlueBeacon automatically. No extra setup is needed — using these images automatically enables the container health check.
+
+- Tags align with the upstream yolk tags (e.g., `java_8`, `java_11`, `java_17`, `java_21`, as well as `java_17j9`,
+  etc.).
+- Each BlueBeacon image layer adds the BlueBeacon binary, and the Dockerfile includes a HEALTHCHECK that runs BlueBeacon
+  automatically. No extra setup is needed — using these images automatically enables the container health check.
 - Images are published to this project's Container Registry at the URL above.
 
 Examples:
-- Pull a specific tag with Docker:
-  - `docker pull registry.gitlab.project-creative.net/auradev/bluebeacon:java_17`
-- Use as a Pterodactyl image for a Java 17 server Egg:
-  - Image: `registry.gitlab.project-creative.net/auradev/bluebeacon:java_17`
-  - Health check: already configured and active by default (no additional configuration required).
 
-Note: The images are built in CI using the corresponding upstream yolk as the base (e.g., `ghcr.io/pterodactyl/yolks:java_17`), ensuring compatibility with Pterodactyl's ecosystem.
+- Pull a specific tag with Docker:
+    - `docker pull registry.gitlab.project-creative.net/auradev/bluebeacon:java_17`
+- Use as a Pterodactyl image for a Java 17 server Egg:
+    - Image: `registry.gitlab.project-creative.net/auradev/bluebeacon:java_17`
+    - Health check: already configured and active by default (no additional configuration required).
+
+Note: The images are built in CI using the corresponding upstream yolk as the base (e.g.,
+`ghcr.io/pterodactyl/yolks:java_17`), ensuring compatibility with Pterodactyl's ecosystem.
 
 ## License
 
