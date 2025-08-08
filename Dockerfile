@@ -18,7 +18,7 @@ RUN pip install --root-user-action=ignore --no-cache-dir . nuitka
 RUN python -m nuitka \
     --onefile \
     --standalone \
-    --static-libpython \
+    --static-libpython=yes \
     --output-filename=bluebeacon \
     src/bluebeacon/cli.py
 
