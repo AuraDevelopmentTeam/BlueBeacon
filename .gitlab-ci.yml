@@ -91,10 +91,15 @@ pytest:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
   script:
-    - docker build --build-arg BASE_IMAGE="$BASE_IMAGE" -f Dockerfile -t "$CI_REGISTRY_IMAGE:$IMAGE_TAG" .
-    - docker push "$CI_REGISTRY_IMAGE:$IMAGE_TAG"
+    - docker build --build-arg BASE_IMAGE="$BASE_IMAGE" -f Dockerfile -t "$FULL_IMAGE_TAG" .
+    - docker push "$FULL_IMAGE_TAG"
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      variables:
+        FULL_IMAGE_TAG: '$CI_REGISTRY_IMAGE:$IMAGE_TAG'
+    - if: '$CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH'
+      variables:
+        FULL_IMAGE_TAG: '$CI_REGISTRY_IMAGE:${IMAGE_TAG}-${CI_COMMIT_REF_SLUG}'
 
 build:java-matrix:
   extends: .docker-build
