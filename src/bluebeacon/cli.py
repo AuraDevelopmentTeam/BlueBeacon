@@ -10,6 +10,10 @@ import click
 
 from bluebeacon import detector
 
+EXIT_SUCCESS = 0
+EXIT_FAILURE = 1
+EXIT_ERROR = 2
+
 
 @click.command(help="Docker healthcheck utility for Minecraft servers")
 @click.argument(
@@ -21,15 +25,20 @@ def main(config_path: Path) -> int:
     Args:
         config_path: Path to server config file or directory (default: user home)
     """
-
     try:
         server_config = detector.find_server_config(config_path)
     except FileNotFoundError as exc:
         click.echo(f"Error: {exc}")
-        return 1
+        raise click.exceptions.Exit(EXIT_ERROR)
 
-    return 0
+    try:
+        server_address, server_port = detector.parse_server_config(server_config)
+    except ValueError as exc:
+        click.echo(f"Error: {exc}")
+        raise click.exceptions.Exit(EXIT_ERROR)
+
+    raise click.exceptions.Exit(EXIT_SUCCESS)
 
 
 if __name__ == "__main__":  # pragma: no cover
-    sys.exit(main())
+    main()

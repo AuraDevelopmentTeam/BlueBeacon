@@ -1,5 +1,6 @@
 """Tests for the CLI module."""
 
+import ipaddress
 from pathlib import Path
 
 from click.testing import CliRunner
@@ -17,13 +18,16 @@ class TestCli:
         mock_find_config = mocker.patch("bluebeacon.detector.find_server_config")
         mock_find_config.return_value = Path("/mock/path/server.properties")
 
+        # Mock the detector.parse_server_config function to return address and port
+        mock_parse_config = mocker.patch("bluebeacon.detector.parse_server_config")
+        mock_parse_config.return_value = (ipaddress.IPv4Address("127.0.0.1"), 25565)
+
         # Run the CLI
         runner = CliRunner()
         result = runner.invoke(cli.main)
 
-        # Verify the result
+        # Verify the result and the mocks
         assert result.exit_code == 0
-        # Verify the mock was called with the default path (home directory)
         mock_find_config.assert_called_once_with(Path.home())
 
     def test_main_success_with_config_path(self, mocker: MockerFixture) -> None:
@@ -32,14 +36,17 @@ class TestCli:
         mock_find_config = mocker.patch("bluebeacon.detector.find_server_config")
         mock_find_config.return_value = Path("/mock/path/server.properties")
 
+        # Mock the detector.parse_server_config function to return address and port
+        mock_parse_config = mocker.patch("bluebeacon.detector.parse_server_config")
+        mock_parse_config.return_value = (ipaddress.IPv4Address("127.0.0.1"), 25565)
+
         # Run the CLI with a specific path
         test_path = "test_config_path"
         runner = CliRunner()
         result = runner.invoke(cli.main, [test_path])
 
-        # Verify the result
+        # Verify the result and the mocks
         assert result.exit_code == 0
-        # Verify the mock was called with the specified path
         mock_find_config.assert_called_once_with(Path(test_path))
 
     def test_main_failure_config_not_found(self, mocker: MockerFixture) -> None:
@@ -53,11 +60,9 @@ class TestCli:
         runner = CliRunner()
         result = runner.invoke(cli.main)
 
-        # Instead of checking exit_code, we verify the error message is in the output
-        # This confirms the error path was taken
+        # Verify the result and the mocks
         assert f"Error: {error_message}" in result.output
-
-        # Also verify the mock was called with the default path
+        assert result.exit_code == 2
         mock_find_config.assert_called_once_with(Path.home())
 
     def test_main_with_invalid_path(self, mocker: MockerFixture) -> None:
@@ -71,9 +76,45 @@ class TestCli:
         runner = CliRunner()
         result = runner.invoke(cli.main, [test_path])
 
-        # Instead of checking exit_code, we verify the error message is in the output
-        # This confirms the error path was taken
+        # Verify the result and the mocks
         assert "Error: Invalid path" in result.output
-
-        # Also verify the mock was called with the specified path
+        assert result.exit_code == 2
         mock_find_config.assert_called_once_with(Path(test_path))
+
+    def test_main_success_with_parse_config(self, mocker: MockerFixture) -> None:
+        """Test the main function with successful config parsing."""
+        # Mock the detector.find_server_config function to return a Path
+        mock_find_config = mocker.patch("bluebeacon.detector.find_server_config")
+        mock_find_config.return_value = Path("/mock/path/server.properties")
+
+        # Mock the detector.parse_server_config function to return address and port
+        mock_parse_config = mocker.patch("bluebeacon.detector.parse_server_config")
+        mock_parse_config.return_value = (ipaddress.IPv4Address("127.0.0.1"), 25565)
+
+        # Run the CLI
+        runner = CliRunner()
+        result = runner.invoke(cli.main)
+
+        # Verify the result and the mocks
+        assert result.exit_code == 0
+        mock_parse_config.assert_called_once_with(Path("/mock/path/server.properties"))
+
+    def test_main_failure_parse_config(self, mocker: MockerFixture) -> None:
+        """Test the main function when config parsing fails."""
+        # Mock the detector.find_server_config function to return a Path
+        mock_find_config = mocker.patch("bluebeacon.detector.find_server_config")
+        mock_find_config.return_value = Path("/mock/path/server.properties")
+
+        # Mock the detector.parse_server_config function to raise ValueError
+        mock_parse_config = mocker.patch("bluebeacon.detector.parse_server_config")
+        error_message = "Unsupported server config file format"
+        mock_parse_config.side_effect = ValueError(error_message)
+
+        # Run the CLI
+        runner = CliRunner()
+        result = runner.invoke(cli.main)
+
+        # Verify the result and the mocks
+        assert f"Error: {error_message}" in result.output
+        assert result.exit_code == 2
+        mock_parse_config.assert_called_once_with(Path("/mock/path/server.properties"))
