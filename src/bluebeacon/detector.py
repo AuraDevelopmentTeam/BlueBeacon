@@ -53,11 +53,22 @@ def parse_server_config(
     :raises ValueError: If the configuration file format is unsupported.
     """
     for parser in [_parse_ini_config, _parse_yaml_config, _parse_toml_config]:
-        result = parser(config_file)
-        if result is not None:
-            return result
+        try:
+            result = parser(config_file)
+            if result is not None:
+                break
+        except ValueError:
+            # Invalid IP address or port number
+            pass
+    else:
+        raise ValueError(f"Unsupported server config file format: {config_file}")
 
-    raise ValueError(f"Unsupported server config file format: {config_file}")
+    if result[0] == ipaddress.IPv4Address("0.0.0.0"):
+        result = (ipaddress.IPv4Address("127.0.0.1"), result[1])
+    elif result[0] == ipaddress.IPv6Address("::"):
+        result = (ipaddress.IPv6Address("::1"), result[1])
+
+    return result
 
 
 def _parse_ini_config(
@@ -90,10 +101,10 @@ def _parse_yaml_config(
     if "listeners" in config:
         for listener in config["listeners"]:
             if "host" in listener:
-                (address, port) = listener["host"].split(":")
+                (address, port) = listener["host"].rsplit(":", 1)
 
                 return (
-                    ipaddress.ip_address(address),
+                    ipaddress.ip_address(address.strip("[]")),
                     int(port),
                 )
 
@@ -110,10 +121,10 @@ def _parse_toml_config(
         return None
 
     if "bind" in config:
-        (address, port) = config["bind"].split(":")
+        (address, port) = config["bind"].rsplit(":", 1)
 
         return (
-            ipaddress.ip_address(address),
+            ipaddress.ip_address(address.strip("[]")),
             int(port),
         )
 

@@ -134,6 +134,19 @@ class TestParseIniConfig:
         assert ip == ipaddress.ip_address("192.168.1.10")
         assert port == 25565
 
+    def test_parse_ini_config_ipv6(self) -> None:
+        """Test parsing an INI config file with IPv6 address."""
+        config_content = "server-address=2001:db8::1\nserver-port=25565"
+        mock_file = mock_open(read_data=config_content)
+
+        with patch("pathlib.Path.open", mock_file):
+            result = _parse_ini_config(Path("server.properties"))
+
+        assert result is not None
+        ip, port = result
+        assert ip == ipaddress.IPv6Address("2001:db8::1")
+        assert port == 25565
+
     def test_parse_ini_missing_fields(self) -> None:
         """Test parsing an INI file with missing fields."""
         config_content = "server-name=MyServer\ndifficulty=hard"
@@ -174,6 +187,23 @@ class TestParseYamlConfig:
         assert result is not None
         ip, port = result
         assert ip == ipaddress.ip_address("192.168.1.20")
+        assert port == 25566
+
+    def test_parse_yaml_config_ipv6(self) -> None:
+        """Test parsing a YAML config file with IPv6 address."""
+        config_content = """
+        listeners:
+          - host: '[2001:db8::1]:25566'
+            motd: My Minecraft Server
+        """
+        mock_file = mock_open(read_data=config_content)
+
+        with patch("pathlib.Path.open", mock_file):
+            result = _parse_yaml_config(Path("config.yml"))
+
+        assert result is not None
+        ip, port = result
+        assert ip == ipaddress.IPv6Address("2001:db8::1")
         assert port == 25566
 
     def test_parse_yaml_missing_fields(self) -> None:
@@ -224,6 +254,22 @@ class TestParseTomlConfig:
         assert ip == ipaddress.ip_address("192.168.1.30")
         assert port == 25567
 
+    def test_parse_toml_config_ipv6(self) -> None:
+        """Test parsing a TOML config file with IPv6 address."""
+        config_content = """
+        bind = "[2001:db8::1]:25567"
+        motd = "My Velocity Server"
+        """
+        mock_file = mock_open(read_data=config_content.encode())
+
+        with patch("pathlib.Path.open", mock_file):
+            result = _parse_toml_config(Path("velocity.toml"))
+
+        assert result is not None
+        ip, port = result
+        assert ip == ipaddress.IPv6Address("2001:db8::1")
+        assert port == 25567
+
     def test_parse_toml_missing_fields(self) -> None:
         """Test parsing a TOML file with missing fields."""
         config_content = """
@@ -260,8 +306,8 @@ class TestParseServerConfig:
         config_file = Path("server.properties")
         expected_result = (ipaddress.ip_address("192.168.1.10"), 25565)
 
-        with patch("bluebeacon.detector._parse_ini_config") as mock_parse:
-            mock_parse.return_value = expected_result
+        with patch("bluebeacon.detector._parse_ini_config") as mock_ini:
+            mock_ini.return_value = expected_result
             with patch("bluebeacon.detector._parse_yaml_config") as mock_yaml:
                 mock_yaml.return_value = None
                 with patch("bluebeacon.detector._parse_toml_config") as mock_toml:
@@ -273,10 +319,11 @@ class TestParseServerConfig:
     def test_parse_yaml_config(self) -> None:
         """Test parsing a config.yml file."""
         config_file = Path("config.yml")
-        expected_result = (ipaddress.ip_address("192.168.1.20"), 25566)
+        ip_addr = ipaddress.IPv4Address("192.168.1.20")
+        expected_result = (ip_addr, 25566)
 
-        with patch("bluebeacon.detector._parse_ini_config") as mock_parse:
-            mock_parse.return_value = None
+        with patch("bluebeacon.detector._parse_ini_config") as mock_ini:
+            mock_ini.return_value = None
             with patch("bluebeacon.detector._parse_yaml_config") as mock_yaml:
                 mock_yaml.return_value = expected_result
                 with patch("bluebeacon.detector._parse_toml_config") as mock_toml:
@@ -290,8 +337,8 @@ class TestParseServerConfig:
         config_file = Path("velocity.toml")
         expected_result = (ipaddress.ip_address("192.168.1.30"), 25567)
 
-        with patch("bluebeacon.detector._parse_ini_config") as mock_parse:
-            mock_parse.return_value = None
+        with patch("bluebeacon.detector._parse_ini_config") as mock_ini:
+            mock_ini.return_value = None
             with patch("bluebeacon.detector._parse_yaml_config") as mock_yaml:
                 mock_yaml.return_value = None
                 with patch("bluebeacon.detector._parse_toml_config") as mock_toml:
@@ -304,8 +351,8 @@ class TestParseServerConfig:
         """Test parsing an unsupported config file format."""
         config_file = Path("unknown.cfg")
 
-        with patch("bluebeacon.detector._parse_ini_config") as mock_parse:
-            mock_parse.return_value = None
+        with patch("bluebeacon.detector._parse_ini_config") as mock_ini:
+            mock_ini.return_value = None
             with patch("bluebeacon.detector._parse_yaml_config") as mock_yaml:
                 mock_yaml.return_value = None
                 with patch("bluebeacon.detector._parse_toml_config") as mock_toml:
@@ -315,3 +362,55 @@ class TestParseServerConfig:
                         parse_server_config(config_file)
 
         assert str(config_file) in str(excinfo.value)
+
+    def test_parse_server_config_invalid_port(self) -> None:
+        """Test parsing a config with invalid port number."""
+        config_file = Path("server.properties")
+
+        # Create a config with an invalid port
+        config_content = "server-address=192.168.1.10\nserver-port=not_a_number"
+        mock_file = mock_open(read_data=config_content.encode())
+
+        with patch("pathlib.Path.open", mock_file):
+            with pytest.raises(ValueError):
+                parse_server_config(config_file)
+
+    def test_parse_server_config_invalid_ip(self) -> None:
+        """Test parsing a config with invalid IP address."""
+        config_file = Path("server.properties")
+
+        # Create a config with an invalid IP address
+        config_content = "server-address=not_an_ip_address\nserver-port=25565"
+        mock_file = mock_open(read_data=config_content.encode())
+
+        with patch("pathlib.Path.open", mock_file):
+            with pytest.raises(ValueError):
+                parse_server_config(config_file)
+
+    def test_parse_server_config_ipv4_any_address(self) -> None:
+        """Test parsing a config with 0.0.0.0 address (any IPv4 address)."""
+        config_file = Path("server.properties")
+        return_result = (ipaddress.ip_address("0.0.0.0"), 25565)
+        localhost = ipaddress.IPv4Address("127.0.0.1")
+
+        with patch("bluebeacon.detector._parse_ini_config") as mock_ini:
+            mock_ini.return_value = return_result
+            result = parse_server_config(config_file)
+
+        # Verify the result
+        assert result[0] == localhost
+        assert result[1] == 25565
+
+    def test_parse_server_config_ipv6_any_address(self) -> None:
+        """Test parsing a config with :: address (any IPv6 address)."""
+        config_file = Path("server.properties")
+        return_result = (ipaddress.ip_address("::"), 25565)
+        localhost = ipaddress.IPv6Address("::1")
+
+        with patch("bluebeacon.detector._parse_ini_config") as mock_ini:
+            mock_ini.return_value = return_result
+            result = parse_server_config(config_file)
+
+        # Verify the result
+        assert result[0] == localhost
+        assert result[1] == 25565
