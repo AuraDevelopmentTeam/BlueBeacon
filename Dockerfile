@@ -14,8 +14,8 @@ WORKDIR /app
 COPY . .
 
 # Install dependencies and PyInstaller
-RUN pip install  --root-user-action --no-cache-dir . \
- && pip install  --root-user-action --no-cache-dir pyinstaller
+RUN pip install --root-user-action=ignore --no-cache-dir . \
+ && pip install --root-user-action=ignore --no-cache-dir pyinstaller
 
 # Create optimized single binary
 RUN pyinstaller --onefile \
