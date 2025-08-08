@@ -1,0 +1,15 @@
+# Exclude everything by default to minimize Docker build context
+**
+
+# Allow only what is required to build the project image
+!Dockerfile
+!pyproject.toml
+!README.md
+!LICENSE
+!src/
+
+# Notes:
+# - The build installs the project using pyproject.toml and compiles from src/.
+# - README.md and LICENSE are referenced by pyproject metadata.
+# - Tests, VCS data, virtualenvs, caches, build artifacts, and other assets are intentionally excluded.
+# - If additional files are needed during the build in the future, unignore them here with a leading '!'.
