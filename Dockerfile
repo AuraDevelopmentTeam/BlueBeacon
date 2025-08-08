@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=alpine:latest
+ARG BASE_IMAGE
 
 # Build stage
 FROM python:3.13-slim AS builder
