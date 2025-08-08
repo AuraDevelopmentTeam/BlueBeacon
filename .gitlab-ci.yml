@@ -9,6 +9,7 @@ include:
 stages:
   - lint
   - test
+  - build
 
 default:
   tags:
@@ -79,3 +80,28 @@ pytest:
     - black
     - isort
     - mypy
+
+# Docker jobs
+.docker-build:
+  stage: build
+  image: docker:27
+  services:
+    - docker:27-dind
+  variables:
+    DOCKERFILE: "Dockerfile"
+    BUILD_CONTEXT: "."
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
+  script:
+    - docker build --build-arg BASE_IMAGE="$BASE_IMAGE" -f "$DOCKERFILE" -t "$CI_REGISTRY_IMAGE:$IMAGE_TAG" "$BUILD_CONTEXT"
+    - docker push "$CI_REGISTRY_IMAGE:$IMAGE_TAG"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+
+build:java21:
+  extends: .docker-build
+  needs:
+    - pytest
+  variables:
+    BASE_IMAGE: "ghcr.io/pterodactyl/yolks:java_21"
+    IMAGE_TAG: "java_21"
