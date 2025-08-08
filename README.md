@@ -27,7 +27,7 @@ Add BlueBeacon to your Minecraft server Dockerfile:
 
 ```dockerfile
 # Add healthcheck using BlueBeacon
-HEALTHCHECK --interval=5s --timeout=1s --start-period=120s --retries=3 \
+HEALTHCHECK --interval=5s --timeout=2s --start-period=120s --retries=3 \
     CMD ["/path/to/bluebeacon"]
 ```
 

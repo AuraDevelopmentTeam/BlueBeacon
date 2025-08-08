@@ -21,7 +21,8 @@ RUN pip install --root-user-action=ignore --no-cache-dir . \
  && pip install --root-user-action=ignore --no-cache-dir pyinstaller staticx
 
 # Create optimized single binary
-RUN pyinstaller --onefile \
+RUN pyinstaller \
+    --onefile \
     --name bluebeacon \
     --strip \
     --optimize 2 \
@@ -29,7 +30,9 @@ RUN pyinstaller --onefile \
     src/bluebeacon/cli.py
 
 # Repackage the binary with bundled libc using staticx
-RUN staticx dist/bluebeacon dist/bluebeacon.static
+RUN staticx \
+    --strip \
+    dist/bluebeacon dist/bluebeacon.static
 
 # Final stage
 FROM ${BASE_IMAGE}
@@ -38,5 +41,5 @@ FROM ${BASE_IMAGE}
 COPY --from=builder --chmod=755 /app/dist/bluebeacon.static /usr/local/bin/bluebeacon
 
 # Set the healthcheck
-HEALTHCHECK --interval=5s --timeout=1s --start-period=120s --retries=3 \
+HEALTHCHECK --interval=5s --timeout=2s --start-period=120s --retries=3 \
     CMD ["/usr/local/bin/bluebeacon"]
