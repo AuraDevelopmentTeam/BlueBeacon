@@ -3,14 +3,18 @@ ARG BASE_IMAGE=alpine:latest
 # Build stage
 FROM python:3.13-slim AS builder
 
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends binutils \
+ && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 # Copy project files
 COPY . .
 
 # Install dependencies and PyInstaller
-RUN pip install --no-cache-dir . && \
-    pip install --no-cache-dir pyinstaller
+RUN pip --root-user-action install --no-cache-dir . && \
+    pip --root-user-action install --no-cache-dir pyinstaller
 
 # Create optimized single binary
 RUN pyinstaller --onefile \
