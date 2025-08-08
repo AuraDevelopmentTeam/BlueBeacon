@@ -14,8 +14,8 @@ WORKDIR /app
 COPY . .
 
 # Install dependencies and PyInstaller
-RUN pip --root-user-action install --no-cache-dir . && \
-    pip --root-user-action install --no-cache-dir pyinstaller
+RUN pip install  --root-user-action --no-cache-dir . \
+ && pip install  --root-user-action --no-cache-dir pyinstaller
 
 # Create optimized single binary
 RUN pyinstaller --onefile \
@@ -29,10 +29,7 @@ RUN pyinstaller --onefile \
 FROM ${BASE_IMAGE}
 
 # Copy the binary from the build stage
-COPY --from=builder /app/dist/bluebeacon /usr/local/bin/bluebeacon
-
-# Make the binary executable
-RUN chmod +x /usr/local/bin/bluebeacon
+COPY --from=builder --chmod=755 /app/dist/bluebeacon /usr/local/bin/bluebeacon
 
 # Set the healthcheck
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
