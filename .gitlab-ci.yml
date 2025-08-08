@@ -56,7 +56,6 @@ mypy:
   stage: lint
   extends: .setup-python
   script:
-    - mypy --install-types src/ test/
     - mypy --color-output --junit-xml=mypy-report.xml src/ test/
   allow_failure: true
   artifacts:
