@@ -74,7 +74,8 @@ yolks") for your Eggs and are built on top of the official Pterodactyl yolk imag
 
 Registry:
 
-- registry.gitlab.project-creative.net/auradev/bluebeacon:TAG
+- Pull URL: registry.gitlab.project-creative.net/auradev/bluebeacon:TAG
+- Tag overview: https://gitlab.project-creative.net/AuraDev/BlueBeacon/container_registry/2
 
 Key details:
 
