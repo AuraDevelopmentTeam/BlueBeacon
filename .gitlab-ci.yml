@@ -46,13 +46,16 @@ mypy:
   stage: lint
   extends: .setup-python
   script:
-    - mypy src/ test/ --no-error-summary > mypy-out.txt
+    - echo "$PATH"
+    - mypy src/ test/ --output=json > mypy-out.json
   after_script:
-    - mypy-gitlab-code-quality < mypy-out.txt > gl-code-quality-report.json
+    - echo "$PATH"
+    - ls -lAh .venv/bin/
+    - mypy-gitlab-code-quality < mypy-out.json > codequality.json
   allow_failure: true
   artifacts:
     reports:
-      codequality: gl-code-quality-report.json
+      codequality: codequality.json
   needs: [ ]
 
 # Test job
