@@ -98,10 +98,22 @@ pytest:
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
 
-build:java21:
+build:java-matrix:
   extends: .docker-build
   needs:
     - pytest
   variables:
-    BASE_IMAGE: "ghcr.io/pterodactyl/yolks:java_21"
-    IMAGE_TAG: "java_21"
+    BASE_IMAGE: "ghcr.io/pterodactyl/yolks:${IMAGE_TAG}"
+  parallel:
+    matrix:
+      - IMAGE_TAG: "java_8"
+      - IMAGE_TAG: "java_8j9"
+      - IMAGE_TAG: "java_11"
+      - IMAGE_TAG: "java_11j9"
+      - IMAGE_TAG: "java_16"
+      - IMAGE_TAG: "java_16j9"
+      - IMAGE_TAG: "java_17"
+      - IMAGE_TAG: "java_17j9"
+      - IMAGE_TAG: "java_19"
+      - IMAGE_TAG: "java_19j9"
+      - IMAGE_TAG: "java_21"
