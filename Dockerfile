@@ -4,7 +4,7 @@ ARG BASE_IMAGE
 FROM python:3.13-alpine AS builder
 
 # Install build tools and musl headers
-RUN apk add --no-cache build-base musl-dev python3-dev
+RUN apk add --no-cache build-base musl-dev
 
 WORKDIR /app
 
@@ -18,7 +18,6 @@ RUN pip install --root-user-action=ignore --no-cache-dir . nuitka
 RUN python -m nuitka \
     --onefile \
     --standalone \
-    --static-libpython=yes \
     --output-filename=bluebeacon \
     src/bluebeacon/cli.py
 
