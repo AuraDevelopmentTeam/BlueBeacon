@@ -1,3 +1,10 @@
+# Enable Static Application Security Testing (SAST)
+sast:
+  stage: test
+include:
+  - template: Jobs/SAST.gitlab-ci.yml
+
+# Normal Pipeline
 stages:
   - lint
   - test
@@ -46,11 +53,12 @@ mypy:
   stage: lint
   extends: .setup-python
   script:
-    - mypy --color-output --junit-xml=mypy-report.xml src/ test/
+    - set -o pipefail
+    - mypy src/ test/ --output=json | mypy-gitlab-code-quality > codequality.json
   allow_failure: true
   artifacts:
     reports:
-      codequality: mypy-report.xml
+      codequality: codequality.json
   needs: [ ]
 
 # Test job
