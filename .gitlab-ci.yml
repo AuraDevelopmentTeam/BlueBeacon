@@ -46,11 +46,13 @@ mypy:
   stage: lint
   extends: .setup-python
   script:
-    - mypy --color-output --junit-xml=mypy-report.xml src/ test/
+    - mypy src/ test/ -no-error-summary > mypy-out.txt
+  after_script:
+    - mypy-gitlab-code-quality < mypy-out.txt > gl-code-quality-report.json
   allow_failure: true
   artifacts:
     reports:
-      codequality: mypy-report.xml
+      codequality: gl-code-quality-report.json
   needs: [ ]
 
 # Test job
