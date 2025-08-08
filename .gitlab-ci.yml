@@ -1,6 +1,7 @@
 # Enable Static Application Security Testing (SAST)
 sast:
   stage: test
+  needs: [ ]
 include:
   - template: Jobs/SAST.gitlab-ci.yml
 
