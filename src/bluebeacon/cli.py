@@ -15,15 +15,26 @@ EXIT_FAILURE = 1
 EXIT_ERROR = 2
 
 
-@click.command(help="Docker healthcheck utility for Minecraft servers")
+@click.command()
+@click.help_option("--help", "-h")
 @click.argument(
     "config_path", type=click.Path(path_type=Path), required=False, default=Path.home()
 )
 def main(config_path: Path) -> int:
-    """Main entry point for the application.
+    """Docker healthcheck utility for Minecraft servers.
 
+    This tool checks if a Minecraft server is running and responding to ping requests.
+    It automatically detects server configuration from the provided path.
+
+    \b
     Args:
         config_path: Path to server config file or directory (default: user home)
+
+    \b
+    Exit codes:
+        0 - Success: Server is reachable and responding
+        1 - Failure: Server is not reachable or not responding
+        2 - Error: Configuration error or invalid arguments
     """
     try:
         server_config = detector.find_server_config(config_path)
