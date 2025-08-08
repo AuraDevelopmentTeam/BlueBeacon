@@ -46,7 +46,7 @@ mypy:
   stage: lint
   extends: .setup-python
   script:
-    - mypy src/ test/ -no-error-summary > mypy-out.txt
+    - mypy src/ test/ --no-error-summary > mypy-out.txt
   after_script:
     - mypy-gitlab-code-quality < mypy-out.txt > gl-code-quality-report.json
   allow_failure: true
