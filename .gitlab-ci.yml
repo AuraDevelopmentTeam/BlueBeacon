@@ -20,7 +20,7 @@ variables:
       - .pip-cache/
       - .venv/
 
-prepare:
+prepare_venv:
   stage: prepare
   extends: .setup-python
   before_script: [ ]
@@ -41,7 +41,7 @@ black:
     - black --check --diff --color src/ test/
   allow_failure: true
   needs:
-    - prepare
+    - prepare_venv
 
 isort:
   stage: lint
@@ -50,7 +50,7 @@ isort:
     - isort --check --diff --color src/ test/
   allow_failure: true
   needs:
-    - prepare
+    - prepare_venv
 
 mypy:
   stage: lint
@@ -62,7 +62,7 @@ mypy:
     reports:
       codequality: mypy-report.xml
   needs:
-    - prepare
+    - prepare_venv
 
 # Test job
 pytest:
