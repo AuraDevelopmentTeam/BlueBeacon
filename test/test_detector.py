@@ -123,7 +123,7 @@ class TestParseIniConfig:
 
     def test_parse_valid_ini_config(self) -> None:
         """Test parsing a valid INI config file."""
-        config_content = "server-address=192.168.1.10\nserver-port=25565"
+        config_content = "server-ip=192.168.1.10\nserver-port=25565"
         mock_file = mock_open(read_data=config_content)
 
         with patch("pathlib.Path.open", mock_file):
@@ -136,7 +136,7 @@ class TestParseIniConfig:
 
     def test_parse_ini_config_ipv6(self) -> None:
         """Test parsing an INI config file with IPv6 address."""
-        config_content = "server-address=2001:db8::1\nserver-port=25565"
+        config_content = "server-ip=2001:db8::1\nserver-port=25565"
         mock_file = mock_open(read_data=config_content)
 
         with patch("pathlib.Path.open", mock_file):
@@ -160,7 +160,7 @@ class TestParseIniConfig:
     def test_parse_ini_invalid_format(self) -> None:
         """Test parsing an invalid INI file."""
         # Create invalid content that will cause javaproperties to raise an exception
-        config_content = "server-address=192.168.1.10\\uXYZ"  # Invalid unicode escape
+        config_content = "server-ip=192.168.1.10\\uXYZ"  # Invalid unicode escape
         mock_file = mock_open(read_data=config_content)
 
         with patch("pathlib.Path.open", mock_file):
@@ -368,7 +368,7 @@ class TestParseServerConfig:
         config_file = Path("server.properties")
 
         # Create a config with an invalid port
-        config_content = "server-address=192.168.1.10\nserver-port=not_a_number"
+        config_content = "server-ip=192.168.1.10\nserver-port=not_a_number"
         mock_file = mock_open(read_data=config_content.encode())
 
         with patch("pathlib.Path.open", mock_file):
@@ -380,7 +380,7 @@ class TestParseServerConfig:
         config_file = Path("server.properties")
 
         # Create a config with an invalid IP address
-        config_content = "server-address=not_an_ip_address\nserver-port=25565"
+        config_content = "server-ip=not_an_ip_address\nserver-port=25565"
         mock_file = mock_open(read_data=config_content.encode())
 
         with patch("pathlib.Path.open", mock_file):

@@ -80,9 +80,9 @@ def _parse_ini_config(
     except javaproperties.InvalidUEscapeError:
         return None
 
-    if "server-address" in config and "server-port" in config:
+    if "server-ip" in config and "server-port" in config:
         return (
-            ipaddress.ip_address(config["server-address"]),
+            ipaddress.ip_address(config["server-ip"]),
             int(config["server-port"]),
         )
 
