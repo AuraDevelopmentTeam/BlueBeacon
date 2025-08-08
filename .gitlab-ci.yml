@@ -46,12 +46,8 @@ mypy:
   stage: lint
   extends: .setup-python
   script:
-    - echo "$PATH"
-    - mypy src/ test/ --output=json > mypy-out.json
-  after_script:
-    - echo "$PATH"
-    - ls -lAh .venv/bin/
-    - mypy-gitlab-code-quality < mypy-out.json > codequality.json
+    - set -o pipefail
+    - mypy src/ test/ --output=json | mypy-gitlab-code-quality > codequality.json
   allow_failure: true
   artifacts:
     reports:
