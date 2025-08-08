@@ -34,30 +34,28 @@ Exit codes:
     metavar="CONFIG_PATH",
     default=Path.home(),
 )
-def main(config_path: Path, version: bool) -> int:
+@click.pass_context
+def main(ctx: click.Context, config_path: Path, version: bool) -> int:
     """Implementation of the BlueBeacon CLI."""
     if version:
         click.echo(f"BlueBeacon v{__version__}")
-        raise click.exceptions.Exit(EXIT_SUCCESS)
+        ctx.exit(EXIT_SUCCESS)
 
     try:
         server_config = detector.find_server_config(config_path)
     except FileNotFoundError as exc:
         click.echo(f"Error: {exc}")
-        raise click.exceptions.Exit(EXIT_ERROR)
+        ctx.exit(EXIT_ERROR)
 
     try:
         server_address, server_port = detector.parse_server_config(server_config)
     except ValueError as exc:
         click.echo(f"Error: {exc}")
-        raise click.exceptions.Exit(EXIT_ERROR)
+        ctx.exit(EXIT_ERROR)
 
     server_reachable = ping.ping_server(server_address, server_port)
 
-    if server_reachable:
-        raise click.exceptions.Exit(EXIT_SUCCESS)
-    else:
-        raise click.exceptions.Exit(EXIT_FAILURE)
+    ctx.exit(EXIT_SUCCESS if server_reachable else EXIT_FAILURE)
 
 
 if __name__ == "__main__":  # pragma: no cover
