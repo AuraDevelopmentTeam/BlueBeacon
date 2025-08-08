@@ -4,7 +4,7 @@ ARG BASE_IMAGE
 FROM python:3.13-alpine AS builder
 
 # Install build tools and musl headers
-RUN apk add --no-cache build-base musl-dev
+RUN apk add --no-cache build-base musl-dev patchelf
 
 WORKDIR /app
 
