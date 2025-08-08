@@ -32,8 +32,9 @@ Exit codes:
     type=click.Path(path_type=Path),
     required=False,
     metavar="CONFIG_PATH",
+    default=Path.home(),
 )
-def main(config_path: Path = Path.home(), version: bool = False) -> int:
+def main(config_path: Path, version: bool) -> int:
     """Implementation of the BlueBeacon CLI."""
     if version:
         click.echo(f"BlueBeacon v{__version__}")

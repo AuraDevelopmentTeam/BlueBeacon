@@ -12,6 +12,26 @@ from bluebeacon import cli
 class TestCli:
     """Tests for the main CLI function."""
 
+    def test_00_version_long_flag(self) -> None:
+        """--version should print version and exit with code 0 (first)."""
+        runner = CliRunner()
+        result = runner.invoke(cli.main, ["--version"])
+        assert result.exit_code == 0
+        # Expect output like: "BlueBeacon v0.1.1\n"
+        assert result.output.startswith("BlueBeacon v")
+        assert result.output.endswith("\n")
+        # Ensure there is something after the 'v'
+        assert len(result.output.strip()) > len("BlueBeacon v")
+
+    def test_01_version_short_flag(self) -> None:
+        """-V should print version and exit with code 0 (first)."""
+        runner = CliRunner()
+        result = runner.invoke(cli.main, ["-V"])
+        assert result.exit_code == 0
+        assert result.output.startswith("BlueBeacon v")
+        assert result.output.endswith("\n")
+        assert len(result.output.strip()) > len("BlueBeacon v")
+
     def test_main_success_no_args(self, mocker: MockerFixture) -> None:
         """Test the main function with no arguments when config is found."""
         # Mock the detector.find_server_config function to return a Path
