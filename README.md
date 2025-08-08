@@ -24,7 +24,7 @@ Add BlueBeacon to your Minecraft server Dockerfile:
 
 ```dockerfile
 # Add healthcheck using BlueBeacon
-HEALTHCHECK --interval=5s --timeout=1s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=5s --timeout=1s --start-period=120s --retries=3 \
     CMD ["/path/to/bluebeacon"]
 ```
 
@@ -52,6 +52,29 @@ If no path is provided, BlueBeacon will search the current user's home directory
 ## Distribution
 
 BlueBeacon is distributed as source code, with a template Dockerfile that includes a build stage to compile it into a standalone binary. This ensures no additional dependencies are needed in the final Docker image.
+
+## Prebuilt Docker images for Pterodactyl
+
+Prebuilt container images are provided for use with Pterodactyl. These images are designed to be used as base images ("yolks") for your Eggs and are built on top of the official Pterodactyl yolk images:
+
+- Official yolks: https://github.com/pterodactyl/yolks/pkgs/container/yolks
+
+Registry:
+- registry.gitlab.project-creative.net/auradev/bluebeacon:TAG
+
+Key details:
+- Tags align with the upstream yolk tags (e.g., `java_8`, `java_11`, `java_17`, `java_21`, as well as `java_17j9`, etc.).
+- Each BlueBeacon image layer adds the BlueBeacon binary, and the Dockerfile includes a HEALTHCHECK that runs BlueBeacon automatically. No extra setup is needed — using these images automatically enables the container health check.
+- Images are published to this project's Container Registry at the URL above.
+
+Examples:
+- Pull a specific tag with Docker:
+  - `docker pull registry.gitlab.project-creative.net/auradev/bluebeacon:java_17`
+- Use as a Pterodactyl image for a Java 17 server Egg:
+  - Image: `registry.gitlab.project-creative.net/auradev/bluebeacon:java_17`
+  - Health check: already configured and active by default (no additional configuration required).
+
+Note: The images are built in CI using the corresponding upstream yolk as the base (e.g., `ghcr.io/pterodactyl/yolks:java_17`), ensuring compatibility with Pterodactyl's ecosystem.
 
 ## License
 
