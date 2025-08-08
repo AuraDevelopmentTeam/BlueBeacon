@@ -1,7 +1,10 @@
 stages:
-  - prepare
   - lint
   - test
+
+default:
+  tags:
+    - docker
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
@@ -11,27 +14,16 @@ variables:
 .setup-python:
   image: python:3.13
   before_script:
-    - source .venv/bin/activate
-  # Cache dependencies between jobs
-  cache:
-    key: "$CI_COMMIT_REF_SLUG"
-    policy: pull
-    paths:
-      - .pip-cache/
-      - .venv/
-
-prepare_venv:
-  stage: prepare
-  extends: .setup-python
-  before_script: [ ]
-  script:
     - python -m venv .venv
     - source .venv/bin/activate
     - pip install --upgrade pip
-    - pip install -e ".[dev]"
+    - pip install -Ue ".[dev]"
+  # Cache dependencies between jobs
   cache:
-    policy: push
-  needs: [ ]
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - .pip-cache/
+      - .venv/
 
 # Linting jobs
 black:
@@ -40,8 +32,7 @@ black:
   script:
     - black --check --diff --color src/ test/
   allow_failure: true
-  needs:
-    - prepare_venv
+  needs: [ ]
 
 isort:
   stage: lint
@@ -49,8 +40,7 @@ isort:
   script:
     - isort --check --diff --color src/ test/
   allow_failure: true
-  needs:
-    - prepare_venv
+  needs: [ ]
 
 mypy:
   stage: lint
@@ -61,8 +51,7 @@ mypy:
   artifacts:
     reports:
       codequality: mypy-report.xml
-  needs:
-    - prepare_venv
+  needs: [ ]
 
 # Test job
 pytest:
