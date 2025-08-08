@@ -59,11 +59,12 @@ place server files.
 BlueBeacon is distributed as source code, with a template Dockerfile that includes a build stage to compile it into a
 standalone binary. This ensures no additional dependencies are needed in the final Docker image.
 
-### Note on libc bundling
+### Note on libc and compilation
 
-The build process uses PyInstaller to create a single-file executable and then repackages it with `staticx` to bundle
-required shared libraries, including the C standard library (libc), into the final executable. This makes the binary
-self-contained and not dependent on the base image's libc at runtime.
+The build process uses Nuitka to compile BlueBeacon into a single-file executable in an Alpine (musl) build stage. This
+produces a binary linked against musl libc, and we enable `--static-libpython` so that Python itself is embedded. The
+resulting binary is self-contained for typical deployments and does not depend on the
+base image having CPython or Python packages installed.
 
 ## Prebuilt Docker images for Pterodactyl
 
