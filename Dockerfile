@@ -3,6 +3,7 @@ ARG BASE_IMAGE=alpine:latest
 # Build stage
 FROM python:3.13-slim AS builder
 
+# Install packages required for creating the binary
 RUN apt-get update \
  && apt-get install -y --no-install-recommends binutils \
  && rm -rf /var/lib/apt/lists/*
