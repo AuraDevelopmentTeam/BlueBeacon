@@ -4,4 +4,6 @@ BlueBeacon automatically detects server settings and pings the server to verify
 responsiveness, making it easy to monitor containerized Minecraft servers.
 """
 
-__version__ = "0.1.0"
+from importlib.metadata import version
+
+__version__ = version("bluebeacon")
