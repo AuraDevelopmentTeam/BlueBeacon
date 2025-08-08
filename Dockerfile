@@ -6,9 +6,8 @@ FROM python:3.13-slim AS builder
 # Install packages required for creating the binary and bundling libc
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-    binutils \
-    patchelf \
-    squashfs-tools \
+        binutils \
+        patchelf \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -17,22 +16,21 @@ WORKDIR /app
 COPY . .
 
 # Install dependencies, PyInstaller, and staticx
-RUN pip install --root-user-action=ignore --no-cache-dir . \
- && pip install --root-user-action=ignore --no-cache-dir pyinstaller staticx
+RUN pip install --root-user-action=ignore --no-cache-dir . pyinstaller staticx
 
 # Create optimized single binary
 RUN pyinstaller \
-    --onefile \
-    --name bluebeacon \
-    --strip \
-    --optimize 2 \
-    --console \
-    src/bluebeacon/cli.py
+        --onefile \
+        --name bluebeacon \
+        --strip \
+        --optimize 2 \
+        --console \
+        src/bluebeacon/cli.py
 
 # Repackage the binary with bundled libc using staticx
 RUN staticx \
-    --strip \
-    dist/bluebeacon dist/bluebeacon.static
+        --strip \
+        dist/bluebeacon dist/bluebeacon.static
 
 # Final stage
 FROM ${BASE_IMAGE}
