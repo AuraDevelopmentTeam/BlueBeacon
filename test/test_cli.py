@@ -22,6 +22,10 @@ class TestCli:
         mock_parse_config = mocker.patch("bluebeacon.detector.parse_server_config")
         mock_parse_config.return_value = (ipaddress.IPv4Address("127.0.0.1"), 25565)
 
+        # Mock the ping.ping_server function to return True
+        mock_ping = mocker.patch("bluebeacon.ping.ping_server")
+        mock_ping.return_value = True
+
         # Run the CLI
         runner = CliRunner()
         result = runner.invoke(cli.main)
@@ -39,6 +43,10 @@ class TestCli:
         # Mock the detector.parse_server_config function to return address and port
         mock_parse_config = mocker.patch("bluebeacon.detector.parse_server_config")
         mock_parse_config.return_value = (ipaddress.IPv4Address("127.0.0.1"), 25565)
+
+        # Mock the ping.ping_server function to return True
+        mock_ping = mocker.patch("bluebeacon.ping.ping_server")
+        mock_ping.return_value = True
 
         # Run the CLI with a specific path
         test_path = "test_config_path"
@@ -91,6 +99,10 @@ class TestCli:
         mock_parse_config = mocker.patch("bluebeacon.detector.parse_server_config")
         mock_parse_config.return_value = (ipaddress.IPv4Address("127.0.0.1"), 25565)
 
+        # Mock the ping.ping_server function to return True
+        mock_ping = mocker.patch("bluebeacon.ping.ping_server")
+        mock_ping.return_value = True
+
         # Run the CLI
         runner = CliRunner()
         result = runner.invoke(cli.main)
@@ -118,3 +130,47 @@ class TestCli:
         assert f"Error: {error_message}" in result.output
         assert result.exit_code == 2
         mock_parse_config.assert_called_once_with(Path("/mock/path/server.properties"))
+
+    def test_main_server_reachable(self, mocker: MockerFixture) -> None:
+        """Test the main function when server is unreachable."""
+        # Mock the detector.find_server_config function to return a Path
+        mock_find_config = mocker.patch("bluebeacon.detector.find_server_config")
+        mock_find_config.return_value = Path("/mock/path/server.properties")
+
+        # Mock the detector.parse_server_config function to return address and port
+        mock_parse_config = mocker.patch("bluebeacon.detector.parse_server_config")
+        mock_parse_config.return_value = (ipaddress.IPv4Address("127.0.0.1"), 25565)
+
+        # Mock the ping.ping_server function to return False (server unreachable)
+        mock_ping = mocker.patch("bluebeacon.ping.ping_server")
+        mock_ping.return_value = True
+
+        # Run the CLI
+        runner = CliRunner()
+        result = runner.invoke(cli.main)
+
+        # Verify the result and the mocks
+        assert result.exit_code == 0
+        mock_ping.assert_called_once_with(ipaddress.IPv4Address("127.0.0.1"), 25565)
+
+    def test_main_server_unreachable(self, mocker: MockerFixture) -> None:
+        """Test the main function when server is unreachable."""
+        # Mock the detector.find_server_config function to return a Path
+        mock_find_config = mocker.patch("bluebeacon.detector.find_server_config")
+        mock_find_config.return_value = Path("/mock/path/server.properties")
+
+        # Mock the detector.parse_server_config function to return address and port
+        mock_parse_config = mocker.patch("bluebeacon.detector.parse_server_config")
+        mock_parse_config.return_value = (ipaddress.IPv4Address("127.0.0.1"), 25565)
+
+        # Mock the ping.ping_server function to return False (server unreachable)
+        mock_ping = mocker.patch("bluebeacon.ping.ping_server")
+        mock_ping.return_value = False
+
+        # Run the CLI
+        runner = CliRunner()
+        result = runner.invoke(cli.main)
+
+        # Verify the result and the mocks
+        assert result.exit_code == 1
+        mock_ping.assert_called_once_with(ipaddress.IPv4Address("127.0.0.1"), 25565)

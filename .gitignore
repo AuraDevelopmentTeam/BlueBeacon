@@ -1,3 +1,6 @@
+# Ignore a server.properties file, so you can test more easily
+/server.properties
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

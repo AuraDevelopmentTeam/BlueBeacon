@@ -3,12 +3,11 @@
 This module provides the main entry point for the BlueBeacon utility.
 """
 
-import sys
 from pathlib import Path
 
 import click
 
-from bluebeacon import detector
+from bluebeacon import detector, ping
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
@@ -48,7 +47,12 @@ def main(config_path: Path) -> int:
         click.echo(f"Error: {exc}")
         raise click.exceptions.Exit(EXIT_ERROR)
 
-    raise click.exceptions.Exit(EXIT_SUCCESS)
+    server_reachable = ping.ping_server(server_address, server_port)
+
+    if server_reachable:
+        raise click.exceptions.Exit(EXIT_SUCCESS)
+    else:
+        raise click.exceptions.Exit(EXIT_FAILURE)
 
 
 if __name__ == "__main__":  # pragma: no cover
