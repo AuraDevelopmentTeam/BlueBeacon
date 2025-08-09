@@ -31,7 +31,7 @@ class TestPingServer:
 
         # Verify the result and that JavaServer was called correctly
         assert result is True
-        mock_java_class.assert_called_once_with("127.0.0.1", 25565, 0.5)
+        mock_java_class.assert_called_once_with("127.0.0.1", 25565, 0.25)
         mock_java_server.status.assert_called_once()
 
     def test_ping_server_bedrock_success(self) -> None:
@@ -54,7 +54,7 @@ class TestPingServer:
 
         # Verify the result and that BedrockServer was called correctly
         assert result is True
-        mock_bedrock_class.assert_called_once_with("127.0.0.1", 25565, 0.5)
+        mock_bedrock_class.assert_called_once_with("127.0.0.1", 25565, 0.25)
         mock_bedrock_server.status.assert_called_once()
 
     def test_ping_server_both_fail(self) -> None:
@@ -120,4 +120,4 @@ class TestPingServer:
 
         # Verify the result and that JavaServer was called with bracketed IPv6 address
         assert result is True
-        mock_java_class.assert_called_once_with("[::1]", 25565, 0.5)
+        mock_java_class.assert_called_once_with("[::1]", 25565, 0.25)
