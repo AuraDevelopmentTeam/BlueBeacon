@@ -9,6 +9,7 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends \
         build-essential \
         ca-certificates \
+        ccache \
         curl \
         git \
         libbz2-dev \
@@ -21,6 +22,7 @@ RUN apt-get update \
         libxml2-dev \
         libxmlsec1-dev \
         make \
+        patchelf \
         tk-dev \
         xz-utils \
         zlib1g-dev \
@@ -37,7 +39,7 @@ RUN pyenv install 3.13 \
  && pyenv global 3.13
 
 # Upgrade pip and install pyinstaller
-RUN pip install --root-user-action=ignore --no-cache-dir --upgrade pip setuptools wheel pyinstaller
+RUN pip install --root-user-action=ignore --no-cache-dir --upgrade pip setuptools wheel nuitka
 
 # Copy project files
 WORKDIR /app

@@ -56,7 +56,7 @@ place server files.
 
 ## Distribution
 
-BlueBeacon is distributed as source code, with a template Dockerfile that includes a build stage to compile it into a
+BlueBeacon is distributed as source code, with a template Dockerfiles that include a build stage to compile it into a
 standalone binary. This ensures no additional dependencies are needed in the final Docker image.
 
 ### Building your own image (Dockerfile templates)
