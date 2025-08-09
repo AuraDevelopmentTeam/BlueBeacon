@@ -1,4 +1,4 @@
-ARG BASE_IMAGE
+ARG BASE_IMAGE=scratch
 
 FROM alpine:latest AS builder
 
