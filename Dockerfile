@@ -55,7 +55,7 @@ RUN mkdir dist \
         --standalone \
         --static-libpython=yes \
         --lto=yes \
-        --nofollow-import-to=setuptools \
+        --onefile-no-compression \
         --output-dir=dist \
         --output-filename=bluebeacon \
         src/bluebeacon/cli.py

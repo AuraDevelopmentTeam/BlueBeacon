@@ -27,6 +27,7 @@ RUN mkdir dist \
         --onefile \
         --standalone \
         --lto=yes \
+        --onefile-no-compression \
         --nofollow-import-to=setuptools \
         --output-dir=dist \
         --output-filename=bluebeacon \
