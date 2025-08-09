@@ -18,6 +18,8 @@ default:
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
   PYTHONPATH: "$CI_PROJECT_DIR"
+  DOCKER_VERSION: 27
+  DOCKER_HOST: unix:///var/run/docker.sock
 
 # Common setup for all jobs
 .setup-python:
@@ -84,6 +86,7 @@ pytest:
 # Docker jobs
 build:create-cache:
   stage: build
+  image: docker:${DOCKER_VERSION}
   script:
     # Hydrate the build cache. This step can take a long time. Having it in a separate job allows us to indirectly cache
     # it. The consequent build jobs will use the cache and be much faster.
@@ -93,9 +96,6 @@ build:create-cache:
 
 .docker-build:
   stage: build
-  variables:
-    DOCKER_VERSION: 27
-    DOCKER_HOST: unix:///var/run/docker.sock
   image: docker:${DOCKER_VERSION}
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
