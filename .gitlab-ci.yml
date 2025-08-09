@@ -82,6 +82,15 @@ pytest:
     - mypy
 
 # Docker jobs
+build:create-cache:
+  stage: build
+  script:
+    # Hydrate the build cache. This step can take a long time. Having it in a separate job allows us to indirectly cache
+    # it. The consequent build jobs will use the cache and be much faster.
+    - docker build --target builder .
+  needs:
+    - pytest
+
 .docker-build:
   stage: build
   variables:
@@ -91,8 +100,10 @@ pytest:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
   script:
-    - docker build --build-arg BASE_IMAGE="$BASE_IMAGE" -f Dockerfile -t "$FULL_IMAGE_TAG" .
+    - docker build --build-arg BASE_IMAGE="$BASE_IMAGE" -t "$FULL_IMAGE_TAG" .
     - docker push "$FULL_IMAGE_TAG"
+  needs:
+    - build:create-cache
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       variables:
@@ -103,8 +114,6 @@ pytest:
 
 build:java-matrix:
   extends: .docker-build
-  needs:
-    - pytest
   variables:
     BASE_IMAGE: "ghcr.io/pterodactyl/yolks:${IMAGE_TAG}"
   parallel:
