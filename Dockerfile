@@ -27,7 +27,7 @@ ENV PATH="$PYENV_ROOT/bin:$PYENV_ROOT/shims:$PATH"
 RUN git clone https://github.com/pyenv/pyenv.git $PYENV_ROOT
 
 # Install Python
-RUN PYTHON_CONFIGURE_OPTS="--disable-shared" pyenv install 3.13 \
+RUN PYTHON_CONFIGURE_OPTS="--disable-shared LDFLAGS=-static" pyenv install 3.13 \
  && pyenv global 3.13
 
 # Verify python is fully static
