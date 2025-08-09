@@ -1,24 +1,30 @@
 ARG BASE_IMAGE=scratch
 
-FROM alpine:latest AS builder
+# Build stage
+FROM ubuntu:20.04 AS builder
 
-# Install build dependencies
-RUN apk add --no-cache \
-        bash \
-        build-base \
-        bzip2-dev \
-        ccache \
+# Install packages required for creating the binary and bundling libc
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+        build-essential \
+        ca-certificates \
+        curl \
         git \
+        libbz2-dev \
         libffi-dev \
-        musl-dev \
-        openssl-dev \
-        patchelf \
-        readline-dev \
-        sqlite-dev \
+        liblzma-dev \
+        libncursesw5-dev \
+        libreadline-dev \
+        libsqlite3-dev \
+        libssl-dev \
+        libxml2-dev \
+        libxmlsec1-dev \
+        make \
         tk-dev \
-        xz-dev \
-        zlib-dev \
-        zstd-dev
+        xz-utils \
+        zlib1g-dev \
+ && rm -rf /var/lib/apt/lists/*
 
 # Install pyenv
 ENV PYENV_ROOT="/opt/pyenv"
@@ -26,19 +32,15 @@ ENV PATH="$PYENV_ROOT/bin:$PYENV_ROOT/shims:$PATH"
 
 RUN git clone https://github.com/pyenv/pyenv.git $PYENV_ROOT
 
-# Install Python
-RUN PYTHON_CONFIGURE_OPTS="--disable-shared LDFLAGS=-static" pyenv install 3.13 \
+# Install Python 3.13
+RUN pyenv install 3.13 \
  && pyenv global 3.13
 
-# Verify python is fully static
-RUN pyenv which python && ldd `pyenv which python` || true
+# Upgrade pip and install pyinstaller
+RUN pip install --root-user-action=ignore --no-cache-dir --upgrade pip setuptools wheel pyinstaller
 
-# Upgrade pip and install nuitka
-RUN pip install --root-user-action=ignore --no-cache-dir --upgrade pip setuptools wheel nuitka
-
+# Copy project files
 WORKDIR /app
-
-# Copy your app source files into /app
 COPY . .
 
 # Install project dependencies
@@ -55,9 +57,6 @@ RUN mkdir dist \
         --output-dir=dist \
         --output-filename=bluebeacon \
         src/bluebeacon/cli.py
-
-# Verify the binary is static (should say "not a dynamic executable")
-RUN file dist/bluebeacon && ldd dist/bluebeacon || true
 
 # Final stage
 FROM ${BASE_IMAGE}
