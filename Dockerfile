@@ -1,42 +1,70 @@
 ARG BASE_IMAGE=scratch
 
 # Build stage
-FROM python:3.13-slim AS builder
+FROM ubuntu:20.04 AS builder
 
 # Install packages required for creating the binary and bundling libc
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-        binutils \
+        build-essential \
+        ca-certificates \
+        ccache \
+        curl \
+        git \
+        libbz2-dev \
+        libffi-dev \
+        liblzma-dev \
+        libncursesw5-dev \
+        libreadline-dev \
+        libsqlite3-dev \
+        libssl-dev \
+        libxml2-dev \
+        libxmlsec1-dev \
+        make \
         patchelf \
+        tk-dev \
+        xz-utils \
+        zlib1g-dev \
  && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+# Install pyenv
+ENV PYENV_ROOT="/opt/pyenv"
+ENV PATH="$PYENV_ROOT/bin:$PYENV_ROOT/shims:$PATH"
+
+RUN git clone https://github.com/pyenv/pyenv.git $PYENV_ROOT
+
+# Install Python 3.13
+RUN pyenv install 3.13 \
+ && pyenv global 3.13
+
+# Upgrade pip and install pyinstaller
+RUN pip install --root-user-action=ignore --no-cache-dir --upgrade pip setuptools wheel nuitka
 
 # Copy project files
+WORKDIR /app
 COPY . .
 
-# Install dependencies, PyInstaller, and staticx
-RUN pip install --root-user-action=ignore --no-cache-dir . pyinstaller staticx
+# Install project dependencies
+RUN pip install --root-user-action=ignore --no-cache-dir .
 
-# Create optimized single binary
-RUN pyinstaller \
+# Build static executable with Nuitka
+RUN mkdir dist \
+ && nuitka \
         --onefile \
-        --name bluebeacon \
-        --strip \
-        --optimize 2 \
-        --console \
+        --standalone \
+        --static-libpython=yes \
+        --lto=yes \
+        --nofollow-import-to=setuptools \
+        --output-dir=dist \
+        --output-filename=bluebeacon \
         src/bluebeacon/cli.py
-
-# Repackage the binary with bundled libc using staticx
-RUN staticx \
-        --strip \
-        dist/bluebeacon dist/bluebeacon.static
 
 # Final stage
 FROM ${BASE_IMAGE}
 
 # Copy the binary from the build stage
-COPY --from=builder --chmod=755 /app/dist/bluebeacon.static /usr/local/bin/bluebeacon
+COPY --from=builder --chmod=755 /app/dist/bluebeacon /usr/local/bin/bluebeacon
 
 # Set the healthcheck
 HEALTHCHECK --interval=5s --timeout=2s --start-period=120s --retries=3 \

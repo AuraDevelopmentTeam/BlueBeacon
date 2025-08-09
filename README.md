@@ -3,9 +3,9 @@
 [![Pipeline Status](https://gitlab.project-creative.net/AuraDev/BlueBeacon/badges/master/pipeline.svg)](https://gitlab.project-creative.net/AuraDev/BlueBeacon/-/pipelines)
 [![Coverage](https://gitlab.project-creative.net/AuraDev/BlueBeacon/badges/master/coverage.svg)](https://gitlab.project-creative.net/AuraDev/BlueBeacon/-/graphs/master/charts)
 
-<p align="center">
+<div style="text-align: center;">
   <img src="logo_200.png" alt="BlueBeacon Logo" width="200"/>
-</p>
+</div>
 
 BlueBeacon is a Python utility designed to serve as a Docker healthcheck for Minecraft servers. It automatically detects
 server settings and pings the server to verify responsiveness, making it easy to monitor containerized Minecraft servers
@@ -56,14 +56,35 @@ place server files.
 
 ## Distribution
 
-BlueBeacon is distributed as source code, with a template Dockerfile that includes a build stage to compile it into a
+BlueBeacon is distributed as source code, with a template Dockerfiles that include a build stage to compile it into a
 standalone binary. This ensures no additional dependencies are needed in the final Docker image.
 
-### Note on libc bundling
+### Building your own image (Dockerfile templates)
 
-The build process uses PyInstaller to create a single-file executable and then repackages it with `staticx` to bundle
-required shared libraries, including the C standard library (libc), into the final executable. This makes the binary
-self-contained and not dependent on the base image's libc at runtime.
+This repository includes two Dockerfiles you can use as templates when building images that embed the BlueBeacon binary:
+
+- Dockerfile.simple: Use this as the base template when targeting up-to-date, glibc-based images (for example, current
+  Debian/Ubuntu with glibc). It uses a modern Python base image and is the recommended starting point for most cases.
+- Dockerfile: Use this example when you specifically need compatibility with older glibc versions in the target
+  environment. It builds Python via pyenv on an older Ubuntu base to maximize runtime compatibility with legacy systems.
+
+Note for Alpine-based images: If your target/base image is Alpine (musl), you can change the builder image in
+`Dockerfile.simple` from `python:3.13-slim` to `python:3.13-alpine` to produce a binary suitable for Alpine-based
+images.
+
+Examples:
+
+- Build with the simple template (recommended):
+    - docker build -f Dockerfile.simple -t bluebeacon:latest .
+- Build with the legacy-compat template:
+    - docker build -f Dockerfile -t bluebeacon:legacy .
+
+### Note on the binary format
+
+The build process uses Nuitka to create a single-file executable. The resulting binary links against the system's libc
+present in the build environment. If you need broader runtime compatibility with older glibc versions, build using the
+legacy-compat Dockerfile (`Dockerfile`) on an older base image; otherwise, `Dockerfile.simple` is recommended for
+up-to-date glibc-based targets.
 
 ## Prebuilt Docker images for Pterodactyl
 
