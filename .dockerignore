@@ -2,7 +2,6 @@
 **
 
 # Allow only what is required to build the project image
-!Dockerfile
 !pyproject.toml
 !README.md
 !LICENSE

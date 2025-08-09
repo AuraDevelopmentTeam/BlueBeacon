@@ -1,4 +1,4 @@
-ARG BASE_IMAGE
+ARG BASE_IMAGE=scratch
 
 # Build stage
 FROM python:3.13-slim AS builder
