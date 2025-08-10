@@ -88,7 +88,7 @@ class TestFindServerConfig:
         self,
         temp_dir: Path,
         scenario: str,
-        path_arg: Callable,
+        path_arg: Callable[[Path], Path],
     ) -> None:
         """Test find_server_config when it should fail."""
         # Create any files needed for the test

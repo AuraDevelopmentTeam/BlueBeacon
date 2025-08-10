@@ -17,6 +17,13 @@ def ping_server(
 
     Attempts both Java and Bedrock status checks concurrently and returns True
     as soon as one of them succeeds. Keeps a simple synchronous API.
+
+    Args:
+        server_address: IPv4 or IPv6 address of the Minecraft server to ping
+        server_port: Network port number the Minecraft server is listening on
+
+    Returns:
+        True if the server responds successfully, False otherwise.
     """
 
     host = str(server_address)
@@ -30,7 +37,6 @@ def ping_server(
     # Use condition-based synchronization to avoid fixed-time waiting
     lock = threading.Lock()
     cond = threading.Condition(lock)
-    result = {"success": False, "finished": 0}
     success = False
     finished_threads = 0
 
