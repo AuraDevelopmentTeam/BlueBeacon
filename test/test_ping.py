@@ -1,6 +1,7 @@
 """Tests for the ping module."""
 
 import ipaddress
+import unittest
 from unittest.mock import MagicMock, patch
 
 from bluebeacon.ping import ping_server
@@ -34,6 +35,7 @@ class TestPingServer:
         mock_java_class.assert_called_once_with("127.0.0.1", 25565, 0.25)
         mock_java_server.status.assert_called_once()
 
+    @unittest.skip("Bedrock server check disabled due to segfault from nuitka")
     def test_ping_server_bedrock_success(self) -> None:
         """Test ping_server when Bedrock server responds successfully."""
         # Mock JavaServer to raise an exception

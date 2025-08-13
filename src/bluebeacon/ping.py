@@ -58,7 +58,8 @@ def ping_server(
 
     threads = [
         threading.Thread(target=worker, args=(JavaServer,), daemon=True),
-        # TODO: Reenable BedrockServer after nuitka fixes the segfault
+        # TODO: Re-enable BedrockServer after nuitka fixes the segfault
+        #       Don't forget the tests!
         # threading.Thread(target=worker, args=(BedrockServer,), daemon=True),
     ]
 
