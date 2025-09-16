@@ -39,7 +39,7 @@ RUN pyenv install 3.13 \
  && pyenv global 3.13
 
 # Upgrade pip and install pyinstaller
-RUN pip install --root-user-action=ignore --no-cache-dir --upgrade pip setuptools wheel nuitka
+RUN pip install --root-user-action=ignore --no-cache-dir --upgrade pip setuptools wheel https://github.com/Nuitka/Nuitka/archive/factory.zip
 
 # Copy project files
 WORKDIR /app
