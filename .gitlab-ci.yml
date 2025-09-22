@@ -103,7 +103,8 @@ build:create-cache:
     - docker build --build-arg BASE_IMAGE="$BASE_IMAGE" -t "$FULL_IMAGE_TAG" .
     - docker push "$FULL_IMAGE_TAG"
   needs:
-    - build:create-cache
+    - job: build:create-cache
+      optional: true
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       variables:
