@@ -4,6 +4,8 @@ import ipaddress
 import unittest
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from bluebeacon.ping import ping_server
 
 
@@ -124,3 +126,11 @@ class TestPingServer:
         # Verify the result and that JavaServer was called with bracketed IPv6 address
         assert result is True
         mock_java_class.assert_called_once_with("[::1]", 25565, 0.25)
+
+    def test_ping_server_invalid_server_type(self) -> None:
+        """Test ping_server with an invalid server type."""
+
+        with pytest.raises(ValueError, match="Invalid server type"):
+            ping_server(
+                ipaddress.IPv4Address("127.0.0.1"), 25565, "invalid_type"
+            )
