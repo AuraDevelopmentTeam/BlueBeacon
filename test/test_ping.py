@@ -24,10 +24,10 @@ class TestPingServer:
 
         # Patch the server classes
         with patch(
-                "bluebeacon.ping.JavaServer", return_value=mock_java_server
+            "bluebeacon.ping.JavaServer", return_value=mock_java_server
         ) as mock_java_class:
             with patch(
-                    "bluebeacon.ping.BedrockServer", return_value=mock_bedrock_server
+                "bluebeacon.ping.BedrockServer", return_value=mock_bedrock_server
             ):
                 # Call the function (Java only)
                 result = ping_server(ipaddress.IPv4Address("127.0.0.1"), 25565, "java")
@@ -50,7 +50,7 @@ class TestPingServer:
         # Patch the server classes
         with patch("bluebeacon.ping.JavaServer", return_value=mock_java_server):
             with patch(
-                    "bluebeacon.ping.BedrockServer", return_value=mock_bedrock_server
+                "bluebeacon.ping.BedrockServer", return_value=mock_bedrock_server
             ) as mock_bedrock_class:
                 # Call the function
                 result = ping_server(
@@ -74,7 +74,7 @@ class TestPingServer:
         # Patch the server classes
         with patch("bluebeacon.ping.JavaServer", return_value=mock_java_server):
             with patch(
-                    "bluebeacon.ping.BedrockServer", return_value=mock_bedrock_server
+                "bluebeacon.ping.BedrockServer", return_value=mock_bedrock_server
             ):
                 # Call the function
                 result = ping_server(ipaddress.IPv4Address("127.0.0.1"), 25565, "both")
@@ -95,7 +95,7 @@ class TestPingServer:
         # Patch the server classes
         with patch("bluebeacon.ping.JavaServer", return_value=mock_java_server):
             with patch(
-                    "bluebeacon.ping.BedrockServer", return_value=mock_bedrock_server
+                "bluebeacon.ping.BedrockServer", return_value=mock_bedrock_server
             ):
                 # Call the function
                 result = ping_server(ipaddress.IPv4Address("127.0.0.1"), 25565, "both")
@@ -115,10 +115,10 @@ class TestPingServer:
 
         # Patch the server classes
         with patch(
-                "bluebeacon.ping.JavaServer", return_value=mock_java_server
+            "bluebeacon.ping.JavaServer", return_value=mock_java_server
         ) as mock_java_class:
             with patch(
-                    "bluebeacon.ping.BedrockServer", return_value=mock_bedrock_server
+                "bluebeacon.ping.BedrockServer", return_value=mock_bedrock_server
             ):
                 # Call the function
                 result = ping_server(ipv6_address, 25565, "java")
@@ -131,6 +131,4 @@ class TestPingServer:
         """Test ping_server with an invalid server type."""
 
         with pytest.raises(ValueError, match="Invalid server type"):
-            ping_server(
-                ipaddress.IPv4Address("127.0.0.1"), 25565, "invalid_type"
-            )
+            ping_server(ipaddress.IPv4Address("127.0.0.1"), 25565, "invalid_type")
