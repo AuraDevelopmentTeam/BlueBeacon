@@ -11,6 +11,12 @@ stages:
   - test
   - build
 
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
+    - when: always
+
 default:
   tags:
     - docker
@@ -103,8 +109,7 @@ build:create-cache:
     - docker build --build-arg BASE_IMAGE="$BASE_IMAGE" -t "$FULL_IMAGE_TAG" .
     - docker push "$FULL_IMAGE_TAG"
   needs:
-    - job: build:create-cache
-      optional: true
+    - build:create-cache
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       variables:
