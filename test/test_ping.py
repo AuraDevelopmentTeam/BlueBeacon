@@ -1,7 +1,6 @@
 """Tests for the ping module."""
 
 import ipaddress
-import unittest
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -132,3 +131,106 @@ class TestPingServer:
 
         with pytest.raises(ValueError, match="Invalid server type"):
             ping_server(ipaddress.IPv4Address("127.0.0.1"), 25565, "invalid_type")
+
+    def test_ping_server_wait_loop_succeeds_after_notify(self) -> None:
+        """Ensure the cond.wait() loop is actually entered and exits on success notify.
+
+        We block the worker's status() until we release an event, so the main
+        thread must enter the waiting loop. Then we release and expect success.
+        """
+        import threading
+
+        started = threading.Event()
+        release = threading.Event()
+
+        class FakeJavaServer:
+            def __init__(self, host: str, port: int, timeout: float) -> None:
+                pass
+
+            def status(self) -> object:
+                # Signal we've started and are about to block, so the caller enters cond.wait()
+                started.set()
+                # Block until the test allows us to continue
+                release.wait(timeout=1)
+                return object()
+
+        # Run ping_server in a separate thread so we can assert it's waiting
+        result_container: list[bool] = []
+
+        def run_ping() -> None:
+            res = ping_server(ipaddress.IPv4Address("127.0.0.1"), 25565, "java")
+            result_container.append(res)
+
+        with patch("bluebeacon.ping.JavaServer", new=FakeJavaServer):
+            t = threading.Thread(target=run_ping)
+            t.start()
+
+            # Wait until the worker has started and is blocking inside status()
+            assert started.wait(timeout=1), "Worker did not start in time"
+            # At this point, ping thread should be waiting inside cond.wait()
+            assert t.is_alive(), "Ping thread should be waiting in cond.wait()"
+
+            # Now allow the worker to finish successfully
+            release.set()
+            t.join(timeout=1)
+            assert not t.is_alive(), "Ping thread did not finish after release"
+
+        assert result_container == [True]
+
+    def test_ping_server_wait_loop_exits_after_both_finish_without_success(
+        self,
+    ) -> None:
+        """Ensure the cond.wait() loop exits when both threads finish without success.
+
+        We block both workers, then let them raise TimeoutError, expecting False.
+        """
+        import threading
+
+        started_java = threading.Event()
+        started_bedrock = threading.Event()
+        release = threading.Event()
+
+        class FakeJavaServer:
+            def __init__(self, host: str, port: int, timeout: float) -> None:
+                pass
+
+            def status(self) -> None:
+                started_java.set()
+                release.wait(timeout=1)
+                raise TimeoutError("Java timeout")
+
+        class FakeBedrockServer:
+            def __init__(self, host: str, port: int, timeout: float) -> None:
+                pass
+
+            def status(self) -> None:
+                started_bedrock.set()
+                release.wait(timeout=1)
+                raise TimeoutError("Bedrock timeout")
+
+        result_container: list[bool] = []
+
+        def run_ping() -> None:
+            res = ping_server(ipaddress.IPv4Address("127.0.0.1"), 25565, "both")
+            result_container.append(res)
+
+        with (
+            patch("bluebeacon.ping.JavaServer", new=FakeJavaServer),
+            patch("bluebeacon.ping.BedrockServer", new=FakeBedrockServer),
+        ):
+            t = threading.Thread(target=run_ping)
+            t.start()
+
+            # Wait for both workers to start and block
+            assert started_java.wait(timeout=1), "Java worker did not start in time"
+            assert started_bedrock.wait(
+                timeout=1
+            ), "Bedrock worker did not start in time"
+            assert t.is_alive(), "Ping thread should be waiting in cond.wait()"
+
+            # Let both workers finish (with failures)
+            release.set()
+            t.join(timeout=1)
+            assert not t.is_alive(), "Ping thread did not finish after release"
+
+        assert result_container == [False]
