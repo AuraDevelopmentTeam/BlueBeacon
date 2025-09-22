@@ -68,4 +68,4 @@ COPY --from=builder --chmod=755 /app/dist/bluebeacon /usr/local/bin/bluebeacon
 
 # Set the healthcheck
 HEALTHCHECK --interval=5s --timeout=1s --start-period=120s --retries=3 \
-    CMD ["/usr/local/bin/bluebeacon"]
+    CMD ["/usr/local/bin/bluebeacon", "--java"]

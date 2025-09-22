@@ -14,6 +14,19 @@ EXIT_FAILURE = 1
 EXIT_ERROR = 2
 
 
+def set_server_type(ctx: click.Context, param: click.Parameter, value: bool) -> None:
+    """Callback to handle mutually exclusive server type flags."""
+    if not value:
+        return
+
+    # Get the option name without dashes
+    server_type = param.name
+
+    # Store the server type in the context
+    ctx.ensure_object(dict)
+    ctx.obj["server_type"] = server_type
+
+
 @click.command(
     help="Docker healthcheck utility for Minecraft servers. This tool checks if a Minecraft server is running and responding to ping requests. It automatically detects server configuration from the provided path.",
     short_help="Minecraft server healthcheck utility",
@@ -27,6 +40,27 @@ Exit codes:
 )
 @click.help_option("--help", "-h")
 @click.option("--version", "-V", is_flag=True, help="Show the version and exit")
+@click.option(
+    "--java",
+    is_flag=True,
+    callback=set_server_type,
+    expose_value=False,
+    help="Target Java Edition servers only",
+)
+@click.option(
+    "--bedrock",
+    is_flag=True,
+    callback=set_server_type,
+    expose_value=False,
+    help="Target Bedrock Edition servers only",
+)
+@click.option(
+    "--both",
+    is_flag=True,
+    callback=set_server_type,
+    expose_value=False,
+    help="Target both Java and Bedrock Edition servers (default)",
+)
 @click.argument(
     "config_path",
     type=click.Path(path_type=Path),
@@ -41,6 +75,8 @@ def main(ctx: click.Context, config_path: Path, version: bool) -> int:
         click.echo(f"BlueBeacon v{__version__}")
         ctx.exit(EXIT_SUCCESS)
 
+    server_type = ctx.obj.get("server_type", "both") if ctx.obj else "both"
+
     try:
         server_config = detector.find_server_config(config_path)
     except FileNotFoundError as exc:
@@ -53,7 +89,7 @@ def main(ctx: click.Context, config_path: Path, version: bool) -> int:
         click.echo(f"Error: {exc}")
         ctx.exit(EXIT_ERROR)
 
-    server_reachable = ping.ping_server(server_address, server_port)
+    server_reachable = ping.ping_server(server_address, server_port, server_type)
 
     ctx.exit(EXIT_SUCCESS if server_reachable else EXIT_FAILURE)
 

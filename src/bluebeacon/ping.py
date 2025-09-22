@@ -11,7 +11,9 @@ from mcstatus import BedrockServer, JavaServer
 
 
 def ping_server(
-    server_address: ipaddress.IPv4Address | ipaddress.IPv6Address, server_port: int
+    server_address: ipaddress.IPv4Address | ipaddress.IPv6Address,
+    server_port: int,
+    server_type: str,
 ) -> bool:
     """Ping a Minecraft server using parallel protocol checks using daemon threads.
 
@@ -21,10 +23,14 @@ def ping_server(
     Args:
         server_address: IPv4 or IPv6 address of the Minecraft server to ping
         server_port: Network port number the Minecraft server is listening on
+        server_type: Either "both", "java" or "bedrock"
 
     Returns:
         True if the server responds successfully, False otherwise.
     """
+
+    if server_type not in ["both", "java", "bedrock"]:
+        raise ValueError("Invalid server type")
 
     host = str(server_address)
     if isinstance(server_address, ipaddress.IPv6Address):
@@ -56,10 +62,14 @@ def ping_server(
             finished_threads += 1
             cond.notify()
 
-    threads = [
-        threading.Thread(target=worker, args=(JavaServer,), daemon=True),
-        threading.Thread(target=worker, args=(BedrockServer,), daemon=True),
-    ]
+    threads = []
+
+    if server_type in ["both", "java"]:
+        threads.append(threading.Thread(target=worker, args=(JavaServer,), daemon=True))
+    if server_type in ["both", "bedrock"]:
+        threads.append(
+            threading.Thread(target=worker, args=(BedrockServer,), daemon=True)
+        )
 
     for t in threads:
         t.start()

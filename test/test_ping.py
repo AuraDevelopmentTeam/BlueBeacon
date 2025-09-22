@@ -22,20 +22,19 @@ class TestPingServer:
 
         # Patch the server classes
         with patch(
-            "bluebeacon.ping.JavaServer", return_value=mock_java_server
+                "bluebeacon.ping.JavaServer", return_value=mock_java_server
         ) as mock_java_class:
             with patch(
-                "bluebeacon.ping.BedrockServer", return_value=mock_bedrock_server
+                    "bluebeacon.ping.BedrockServer", return_value=mock_bedrock_server
             ):
-                # Call the function
-                result = ping_server(ipaddress.IPv4Address("127.0.0.1"), 25565)
+                # Call the function (Java only)
+                result = ping_server(ipaddress.IPv4Address("127.0.0.1"), 25565, "java")
 
         # Verify the result and that JavaServer was called correctly
         assert result is True
         mock_java_class.assert_called_once_with("127.0.0.1", 25565, 0.25)
         mock_java_server.status.assert_called_once()
 
-    @unittest.skip("Bedrock server check disabled due to segfault from nuitka")
     def test_ping_server_bedrock_success(self) -> None:
         """Test ping_server when Bedrock server responds successfully."""
         # Mock JavaServer to raise an exception
@@ -49,10 +48,12 @@ class TestPingServer:
         # Patch the server classes
         with patch("bluebeacon.ping.JavaServer", return_value=mock_java_server):
             with patch(
-                "bluebeacon.ping.BedrockServer", return_value=mock_bedrock_server
+                    "bluebeacon.ping.BedrockServer", return_value=mock_bedrock_server
             ) as mock_bedrock_class:
                 # Call the function
-                result = ping_server(ipaddress.IPv4Address("127.0.0.1"), 25565)
+                result = ping_server(
+                    ipaddress.IPv4Address("127.0.0.1"), 25565, "bedrock"
+                )
 
         # Verify the result and that BedrockServer was called correctly
         assert result is True
@@ -71,10 +72,10 @@ class TestPingServer:
         # Patch the server classes
         with patch("bluebeacon.ping.JavaServer", return_value=mock_java_server):
             with patch(
-                "bluebeacon.ping.BedrockServer", return_value=mock_bedrock_server
+                    "bluebeacon.ping.BedrockServer", return_value=mock_bedrock_server
             ):
                 # Call the function
-                result = ping_server(ipaddress.IPv4Address("127.0.0.1"), 25565)
+                result = ping_server(ipaddress.IPv4Address("127.0.0.1"), 25565, "both")
 
         # Verify the result
         assert result is False
@@ -92,10 +93,10 @@ class TestPingServer:
         # Patch the server classes
         with patch("bluebeacon.ping.JavaServer", return_value=mock_java_server):
             with patch(
-                "bluebeacon.ping.BedrockServer", return_value=mock_bedrock_server
+                    "bluebeacon.ping.BedrockServer", return_value=mock_bedrock_server
             ):
                 # Call the function
-                result = ping_server(ipaddress.IPv4Address("127.0.0.1"), 25565)
+                result = ping_server(ipaddress.IPv4Address("127.0.0.1"), 25565, "both")
 
         # Verify the result
         assert result is False
@@ -112,13 +113,13 @@ class TestPingServer:
 
         # Patch the server classes
         with patch(
-            "bluebeacon.ping.JavaServer", return_value=mock_java_server
+                "bluebeacon.ping.JavaServer", return_value=mock_java_server
         ) as mock_java_class:
             with patch(
-                "bluebeacon.ping.BedrockServer", return_value=mock_bedrock_server
+                    "bluebeacon.ping.BedrockServer", return_value=mock_bedrock_server
             ):
                 # Call the function
-                result = ping_server(ipv6_address, 25565)
+                result = ping_server(ipv6_address, 25565, "java")
 
         # Verify the result and that JavaServer was called with bracketed IPv6 address
         assert result is True

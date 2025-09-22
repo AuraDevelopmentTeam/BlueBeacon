@@ -4,7 +4,7 @@ import ipaddress
 from pathlib import Path
 
 from click.testing import CliRunner
-from pytest_mock import MockerFixture
+from pytest_mock import MockerFixture, MockType
 
 from bluebeacon import cli
 
@@ -171,7 +171,9 @@ class TestCli:
 
         # Verify the result and the mocks
         assert result.exit_code == 0
-        mock_ping.assert_called_once_with(ipaddress.IPv4Address("127.0.0.1"), 25565)
+        mock_ping.assert_called_once_with(
+            ipaddress.IPv4Address("127.0.0.1"), 25565, "both"
+        )
 
     def test_main_server_unreachable(self, mocker: MockerFixture) -> None:
         """Test the main function when server is unreachable."""
@@ -193,4 +195,55 @@ class TestCli:
 
         # Verify the result and the mocks
         assert result.exit_code == 1
-        mock_ping.assert_called_once_with(ipaddress.IPv4Address("127.0.0.1"), 25565)
+        mock_ping.assert_called_once_with(
+            ipaddress.IPv4Address("127.0.0.1"), 25565, "both"
+        )
+
+
+class TestCliServerTypeFlags:
+    @staticmethod
+    def _common_mocks(mocker: MockerFixture) -> MockType:
+        mock_find_config = mocker.patch("bluebeacon.detector.find_server_config")
+        mock_find_config.return_value = Path("/mock/path/server.properties")
+        mock_parse_config = mocker.patch("bluebeacon.detector.parse_server_config")
+        mock_parse_config.return_value = (ipaddress.IPv4Address("127.0.0.1"), 25565)
+        mock_ping = mocker.patch("bluebeacon.ping.ping_server")
+        mock_ping.return_value = True
+
+        return mock_ping
+
+    def test_flag_java(self, mocker: MockerFixture) -> None:
+        mock_ping = self._common_mocks(mocker)
+        runner = CliRunner()
+        result = runner.invoke(cli.main, ["--java"])
+        assert result.exit_code == 0
+        mock_ping.assert_called_once_with(
+            ipaddress.IPv4Address("127.0.0.1"), 25565, "java"
+        )
+
+    def test_flag_bedrock(self, mocker: MockerFixture) -> None:
+        mock_ping = self._common_mocks(mocker)
+        runner = CliRunner()
+        result = runner.invoke(cli.main, ["--bedrock"])
+        assert result.exit_code == 0
+        mock_ping.assert_called_once_with(
+            ipaddress.IPv4Address("127.0.0.1"), 25565, "bedrock"
+        )
+
+    def test_flag_both(self, mocker: MockerFixture) -> None:
+        mock_ping = self._common_mocks(mocker)
+        runner = CliRunner()
+        result = runner.invoke(cli.main, ["--both"])
+        assert result.exit_code == 0
+        mock_ping.assert_called_once_with(
+            ipaddress.IPv4Address("127.0.0.1"), 25565, "both"
+        )
+
+    def test_flag_none(self, mocker: MockerFixture) -> None:
+        mock_ping = self._common_mocks(mocker)
+        runner = CliRunner()
+        result = runner.invoke(cli.main, [])
+        assert result.exit_code == 0
+        mock_ping.assert_called_once_with(
+            ipaddress.IPv4Address("127.0.0.1"), 25565, "both"
+        )
