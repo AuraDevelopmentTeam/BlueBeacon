@@ -135,3 +135,5 @@ build:java-matrix:
       - IMAGE_TAG: "java_19"
       - IMAGE_TAG: "java_19j9"
       - IMAGE_TAG: "java_21"
+      - IMAGE_TAG: "java_23"
+      - IMAGE_TAG: "java_25"
