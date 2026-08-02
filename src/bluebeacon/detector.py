@@ -101,7 +101,7 @@ def _parse_yaml_config(
     if "listeners" in config:
         for listener in config["listeners"]:
             if "host" in listener:
-                (address, port) = listener["host"].rsplit(":", 1)
+                address, port = listener["host"].rsplit(":", 1)
 
                 return (
                     ipaddress.ip_address(address.strip("[]")),
@@ -121,7 +121,7 @@ def _parse_toml_config(
         return None
 
     if "bind" in config:
-        (address, port) = config["bind"].rsplit(":", 1)
+        address, port = config["bind"].rsplit(":", 1)
 
         return (
             ipaddress.ip_address(address.strip("[]")),
