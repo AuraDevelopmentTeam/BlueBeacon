@@ -122,18 +122,25 @@ build:java-matrix:
   extends: .docker-build
   variables:
     BASE_IMAGE: "ghcr.io/pterodactyl/yolks:${IMAGE_TAG}"
+  # Upstream Java tags: https://github.com/pterodactyl/yolks/blob/master/.github/workflows/java.yml
+  # Temurin support status (does not cover OpenJ9): https://endoflife.date/eclipse-temurin
+  # Semeru support status (OpenJ9): https://endoflife.date/ibm-semeru-runtime
   parallel:
     matrix:
-      - IMAGE_TAG: "java_8"
-      - IMAGE_TAG: "java_8j9"
-      - IMAGE_TAG: "java_11"
-      - IMAGE_TAG: "java_11j9"
-      - IMAGE_TAG: "java_16"
-      - IMAGE_TAG: "java_16j9"
-      - IMAGE_TAG: "java_17"
-      - IMAGE_TAG: "java_17j9"
-      - IMAGE_TAG: "java_19"
-      - IMAGE_TAG: "java_19j9"
-      - IMAGE_TAG: "java_21"
-      - IMAGE_TAG: "java_23"
-      - IMAGE_TAG: "java_25"
+      - IMAGE_TAG: "java_8" # LTS
+      - IMAGE_TAG: "java_8j9" # LTS
+      - IMAGE_TAG: "java_11" # LTS
+      - IMAGE_TAG: "java_11j9" # LTS
+      - IMAGE_TAG: "java_16" # EOL
+      - IMAGE_TAG: "java_16j9" # EOL
+      - IMAGE_TAG: "java_17" # LTS
+      - IMAGE_TAG: "java_17j9" # LTS
+      - IMAGE_TAG: "java_18" # EOL
+      - IMAGE_TAG: "java_18j9" # EOL
+      - IMAGE_TAG: "java_19" # EOL
+      - IMAGE_TAG: "java_19j9" # EOL
+      - IMAGE_TAG: "java_21" # LTS
+      - IMAGE_TAG: "java_22" # EOL
+      - IMAGE_TAG: "java_23" # EOL
+      - IMAGE_TAG: "java_24" # EOL
+      - IMAGE_TAG: "java_25" # LTS
